@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
-      layout:decorator="blog/layout" th:with=" title=${article.title} + ' |',active='detail'">
+      layout:decorator="blog/layout" th:with="title=${article.title} + '|',active='detail'">
 <header th:replace="blog/layout::headerFragment(${title},${active})"></header>
 <body>
 <div layout:fragment="content">
@@ -83,11 +83,12 @@
                     </div>
                 </div>
                 <div class="comment-button">
-                    <button onclick="commentClick()">发布</button>
+                    <button type="button" onclick="commentClick()">发布</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 </body>
 </html>
