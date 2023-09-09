@@ -267,6 +267,101 @@ public class HomeController extends BaseController {
 
     }
 
+    /**
+     * 教程评论
+     * @param request
+     * @param response
+     * @param csid
+     * @param coid
+     * @param author
+     * @param email
+     * @param url
+     * @param content
+     * @param csrf_token
+     * @return
+     */
+    @PostMapping(value = "/comment2")
+    @ResponseBody
+    public APIResponse comment2(HttpServletRequest request, HttpServletResponse response,
+                               @RequestParam(name = "csid", required = true) Integer csid,
+                               @RequestParam(name = "coid", required = false) Integer coid,
+                               @RequestParam(name = "author", required = false) String author,
+                               @RequestParam(name = "email", required = false) String email,
+                               @RequestParam(name = "url", required = false) String url,
+                               @RequestParam(name = "content", required = true) String content,
+                               @RequestParam(name = "csrf_token", required = true) String csrf_token
+    ) {
+
+        String ref = request.getHeader("Referer");
+        if (StringUtils.isBlank(ref) || StringUtils.isBlank(csrf_token)){
+            return APIResponse.fail("访问失败");
+        }
+
+        String token = cache.hget(Types.CSRF_TOKEN.getType(), csrf_token);
+        if (StringUtils.isBlank(token)) {
+            return APIResponse.fail("访问失败");
+        }
+
+        if (null == csid || StringUtils.isBlank(content)) {
+            return APIResponse.fail("请输入完整后评论");
+        }
+
+        if (StringUtils.isNotBlank(author) && author.length() > 50) {
+            return APIResponse.fail("姓名过长");
+        }
+
+        if (StringUtils.isNotBlank(email) && !TaleUtils.isEmail(email)) {
+            return APIResponse.fail("请输入正确的邮箱格式");
+        }
+
+        if (StringUtils.isNotBlank(url) && !TaleUtils.isURL(url)) {
+            return APIResponse.fail("请输入正确的网址格式");
+        }
+
+        if (content.length() > 200) {
+            return APIResponse.fail("请输入200个字符以内的评价");
+        }
+
+        String val = IPKit.getIpAddressByRequest1(request) + ":" + csid;
+        Integer count = cache.hget(Types.COMMENTS_FREQUENCY.getType(), val);
+        if (null != count && count > 0) {
+            return APIResponse.fail("您发表的评论太快了，请过会再试");
+        }
+
+        author = TaleUtils.cleanXSS(author);
+        content = TaleUtils.cleanXSS(content);
+
+        author = EmojiParser.parseToAliases(author);
+        content = EmojiParser.parseToAliases(content);
+
+
+        CommentDomain comments = new CommentDomain();
+        comments.setAuthor(author);
+        comments.setCid(csid);
+        comments.setIp(request.getRemoteAddr());
+        comments.setUrl(url);
+        comments.setContent(content);
+        comments.setEmail(email);
+        comments.setParent(coid);
+
+        try {
+            commentService.addComment(comments);
+            cookie("tale_remember_author", URLEncoder.encode(author,"UTF-8"), 7 * 24 * 60 * 60, response);
+            cookie("tale_remember_mail", URLEncoder.encode(email,"UTF-8"), 7 * 24 * 60 * 60, response);
+            if (StringUtils.isNotBlank(url)) {
+                cookie("tale_remember_url",URLEncoder.encode(url,"UTF-8"),7 * 24 * 60 * 60, response);
+            }
+            // 设置对每个文章1分钟可以评论一次
+            cache.hset(Types.COMMENTS_FREQUENCY.getType(),val,1,60);
+
+            return APIResponse.success();
+
+        } catch (Exception e) {
+            throw BusinessException.withErrorCode(ErrorConstant.Comment.ADD_NEW_COMMENT_FAIL);
+        }
+
+    }
+
     private void cookie(String name, String value, int maxAge, HttpServletResponse response) {
         Cookie cookie = new Cookie(name,value);
         cookie.setMaxAge(maxAge);

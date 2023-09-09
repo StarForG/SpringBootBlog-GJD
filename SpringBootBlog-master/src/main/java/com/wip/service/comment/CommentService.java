@@ -21,6 +21,8 @@ public interface CommentService {
      * @param comments
      */
     void addComment(CommentDomain comments);
+    void addComment2(CommentDomain comments);
+
 
     /**
      * 通过文章ID获取评论
@@ -28,6 +30,13 @@ public interface CommentService {
      * @return
      */
     List<CommentDomain> getCommentsByCId(Integer cid);
+
+    /**
+     * 通过教程ID获取评论
+     * @param csid
+     * @return
+     */
+    List<CommentDomain> getCommentsByCsId(Integer csid);
 
     /**
      * 根据条件获取评论列表

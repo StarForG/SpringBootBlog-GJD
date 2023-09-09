@@ -42,12 +42,28 @@ public interface MetaService {
     void saveOrUpdate(Integer cid, String name, String type);
 
     /**
+     * 添加或者更新2
+     * @param csid
+     * @param name
+     * @param type
+     */
+    void saveOrUpdate2(Integer csid, String name, String type);
+
+    /**
      * 批量添加
      * @param cid
      * @param names
      * @param type
      */
     void addMetas(Integer cid, String names, String type);
+
+    /**
+     * 批量添加2
+     * @param csid
+     * @param names
+     * @param type
+     */
+    void addMetas2(Integer csid, String names, String type);
 
     /**
      * 删除项目

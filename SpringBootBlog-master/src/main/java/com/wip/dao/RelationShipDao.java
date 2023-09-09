@@ -23,12 +23,14 @@ public interface RelationShipDao {
      * @return
      */
     List<RelationShipDomain> getRelationShipByMid(Integer mid);
+    List<RelationShipDomain> getRelationShipByMid2(Integer mid);
 
     /**
      * 根据meta编号删除关联
      * @param mid
      */
     void deleteRelationShipByMid(Integer mid);
+    void deleteRelationShipByMid2(Integer mid);
 
     /**
      * 获取数量
@@ -39,11 +41,20 @@ public interface RelationShipDao {
     Long getCountById(@Param("cid") Integer cid, @Param("mid") Integer mid);
 
     /**
+     * 获取教程数量
+     * @param csid
+     * @param mid
+     * @return
+     */
+    Long getCountById2(@Param("csid") Integer csid, @Param("mid") Integer mid);
+
+    /**
      * 添加
      * @param relationShip
      * @return
      */
     int addRelationShip(RelationShipDomain relationShip);
+    int addRelationShip2(RelationShipDomain relationShip);
 
     /**
      * 根据文章编号删除关联
@@ -52,8 +63,21 @@ public interface RelationShipDao {
     void deleteRelationShipByCid(int cid);
 
     /**
+     * 根据教程编号删除关联
+     * @param csid
+     */
+    void deleteRelationShipByCsid(int csid);
+
+    /**
      * 根据文章ID获取关联
      * @param cid
      */
     List<RelationShipDomain> getRelationShipByCid(Integer cid);
+
+    /**
+     * 根据教程ID获取关联
+     * @param csid
+     * @return
+     */
+    List<RelationShipDomain> getRelationShipByCsid(Integer csid);
 }

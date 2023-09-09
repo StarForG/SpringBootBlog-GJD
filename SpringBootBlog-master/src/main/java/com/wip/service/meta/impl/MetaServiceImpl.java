@@ -17,6 +17,7 @@ import com.wip.model.ContentDomain;
 import com.wip.model.MetaDomain;
 import com.wip.model.RelationShipDomain;
 import com.wip.service.article.ContentService;
+import com.wip.service.course.CourseService;
 import com.wip.service.meta.MetaService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class MetaServiceImpl implements MetaService {
 
     @Autowired
     private ContentService contentService;
+
+    @Autowired
+    private CourseService courseService;
 
     @Override
     public void saveMeta(String type, String name, Integer mid) {
@@ -111,6 +115,21 @@ public class MetaServiceImpl implements MetaService {
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = {"metaCaches","metaCache"}, allEntries = true, beforeInvocation = true)
+    public void addMetas2(Integer csid, String names, String type) {
+        if (null == csid)
+            throw BusinessException.withErrorCode(ErrorConstant.Common.PARAM_IS_EMPTY);
+
+        if (StringUtils.isNotBlank(names) && StringUtils.isNotBlank(type)) {
+            String[] nameArr = StringUtils.split(names,",");
+            for (String name : nameArr) {
+                this.saveOrUpdate2(csid,name,type);
+            }
+        }
+    }
+
+    @Override
     @CacheEvict(value = {"metaCaches","metaCache"}, allEntries = true,beforeInvocation = true)
     public void saveOrUpdate(Integer cid, String name, String type) {
         MetaCond metaCond = new MetaCond();
@@ -143,6 +162,40 @@ public class MetaServiceImpl implements MetaService {
             }
         }
 
+    }
+
+    @Override
+    @CacheEvict(value = {"metaCaches","metaCache"}, allEntries = true,beforeInvocation = true)
+    public void saveOrUpdate2(Integer csid, String name, String type) {
+        MetaCond metaCond = new MetaCond();
+        metaCond.setName(name);
+        metaCond.setType(type);
+        List<MetaDomain> metas = this.getMetas(metaCond);
+
+        int mid;
+        MetaDomain metaDomain;
+        if (metas.size() == 1) {
+            MetaDomain meta = metas.get(0);
+            mid = meta.getMid();
+        } else if (metas.size() > 1) {
+            throw BusinessException.withErrorCode(ErrorConstant.Meta.NOT_ONE_RESULT);
+        } else {
+            metaDomain = new MetaDomain();
+            metaDomain.setSlug(name);
+            metaDomain.setName(name);
+            metaDomain.setType(type);
+            this.addMea(metaDomain);
+            mid = metaDomain.getMid();
+        }
+        if (mid != 0) {
+            Long count = relationShipDao.getCountById2(csid, mid);
+            if (count ==0) {
+                RelationShipDomain relationShip = new RelationShipDomain();
+                relationShip.setCid(csid);
+                relationShip.setMid(mid);
+                relationShipDao.addRelationShip2(relationShip);
+            }
+        }
     }
 
     @Override

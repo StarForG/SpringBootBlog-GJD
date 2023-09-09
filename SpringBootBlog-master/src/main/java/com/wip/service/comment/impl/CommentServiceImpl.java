@@ -13,8 +13,10 @@ import com.wip.dto.cond.CommentCond;
 import com.wip.exception.BusinessException;
 import com.wip.model.CommentDomain;
 import com.wip.model.ContentDomain;
+import com.wip.model.CourseDomain;
 import com.wip.service.article.ContentService;
 import com.wip.service.comment.CommentService;
+import com.wip.service.course.CourseService;
 import com.wip.utils.DateKit;
 import com.wip.utils.TaleUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +38,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private ContentService contentService;
+
+    @Autowired
+    private CourseService courseService;
 
     private static final Map<String,String> STATUS_MAP = new ConcurrentHashMap<>();
 
@@ -103,12 +108,77 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
+    /**
+     * 添加教程评论
+     * @param comments
+     */
+    @Override
+    @Transactional
+    @CacheEvict(value = "commentCache", allEntries = true)
+    public void addComment2(CommentDomain comments) {
+        String msg = null;
+
+        if (null == comments) {
+            msg = "评论对象为空";
+        }
+
+        if (StringUtils.isBlank(comments.getAuthor())) {
+            comments.setAuthor("热心网友");
+        }
+        if (StringUtils.isNotBlank(comments.getEmail()) && !TaleUtils.isEmail(comments.getEmail())) {
+            msg =  "请输入正确的邮箱格式";
+        }
+        if (StringUtils.isBlank(comments.getContent())) {
+            msg = "评论内容不能为空";
+        }
+        if (comments.getContent().length() < 5 || comments.getContent().length() > 2000) {
+            msg = "评论字数在5-2000个字符";
+        }
+        if (null == comments.getCid()) {
+            msg = "评论文章不能为空";
+        }
+        if (msg != null)
+            throw BusinessException.withErrorCode(msg);
+
+        CourseDomain course = courseService.getCourseById(comments.getCid());
+        if (null == course) {
+            throw BusinessException.withErrorCode("该教程不存在");
+        }
+
+        comments.setOwnerId(course.getAuthorId());
+        comments.setStatus(STATUS_MAP.get(STATUS_BLANK));
+        comments.setCreated(DateKit.getCurrentUnixTime());
+        commentDao.addComment2(comments);
+
+        CourseDomain temp = new CourseDomain();
+        temp.setCsid(course.getCsid());
+        Integer count = course.getCommentsNum();
+        if (null == count) {
+            count = 0;
+        }
+        temp.setCommentsNum(count + 1);
+        courseService.updateCourseById(temp);
+    }
+
     @Override
     @Cacheable(value = "commentCache", key = "'commentsByCId_' + #p0")
     public List<CommentDomain> getCommentsByCId(Integer cid) {
         if (null == cid)
             throw BusinessException.withErrorCode(ErrorConstant.Common.PARAM_IS_EMPTY);
         return commentDao.getCommentByCId(cid);
+    }
+
+    /**
+     * 通过教程ID获取评论
+     * @param csid
+     * @return
+     */
+    @Override
+    @Cacheable(value = "commentCache", key = "'commentsByCId_' + #p0")
+    public List<CommentDomain> getCommentsByCsId(Integer csid) {
+        if (null == csid)
+            throw BusinessException.withErrorCode(ErrorConstant.Common.PARAM_IS_EMPTY);
+        return commentDao.getCommentByCsId(csid);
     }
 
     @Override

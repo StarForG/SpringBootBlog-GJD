@@ -23,6 +23,7 @@ public interface CommentDao {
      * @param comments
      */
     void addComment(CommentDomain comments);
+    void addComment2(CommentDomain comments);
 
     /**
      * 根据文章ID获取评论
@@ -30,6 +31,13 @@ public interface CommentDao {
      * @return
      */
     List<CommentDomain> getCommentByCId(@Param("cid") Integer cid);
+
+    /**
+     * 通过教程ID获取评论
+     * @param csid
+     * @return
+     */
+    List<CommentDomain> getCommentByCsId(@Param("csid") Integer csid);
 
 
     /**
