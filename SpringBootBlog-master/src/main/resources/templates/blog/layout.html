@@ -102,7 +102,7 @@
     if (id == "") {
         id = "index";
     }
-    var ids = ["index","categories","archives","tags","about"];
+    var ids = ["index","course","categories","archives","tags","about"];
     for (var i = 0; i < ids.length; i++) {
         if (id == ids[i]) {
             $("#" + id).addClass("menu-item-active");
@@ -147,6 +147,63 @@
         $.ajax({
             type: 'post',
             url: '/comment',
+            data: data,
+            async: false,
+            dataType: 'json',
+            success: function (result) {
+                // $('#comment-form input[name=coid]').val('');
+                if (result && result.code == 'success') {
+                    alert("评论已提交至后台审核!");
+                    window.location.reload();
+                } else {
+                    if (result.msg) {
+                        alert(result.msg);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * 教程评论提交
+     * @returns {boolean}
+     */
+    function commentClick_cs() {
+        var content = $("#comment-content").val();
+        var author = $("#nickname").val();
+        var email = $("#email").val();
+        var url = $("#url").val();
+        var coid = $("#coid").val();
+        var csid = $("#csid").val();
+        var csrf_token = $("#csrf_token").val();
+
+        if (null == content || "" == content || undefined == content) {
+            alert("内容不能为空");
+            return false;
+        }
+        if (null == author || "" == author || undefined == author) {
+            alert("姓名不能为空");
+            return false;
+        }
+        if (null == email || "" == email || undefined == email) {
+            alert("邮箱不能为空");
+            return false;
+        }
+
+        var data = {
+            "content": content,
+            "author":author,
+            "email": email,
+            "url": url,
+            "csrf_token": csrf_token,
+            "coid": coid,
+            "csid": csid
+        };
+
+        console.log(data);
+        $.ajax({
+            type: 'post',
+            url: '/comment2',
             data: data,
             async: false,
             dataType: 'json',

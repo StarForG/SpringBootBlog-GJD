@@ -7,10 +7,7 @@ import com.wip.constant.WebConst;
 import com.wip.controller.BaseController;
 import com.wip.dto.StatisticsDto;
 import com.wip.exception.BusinessException;
-import com.wip.model.CommentDomain;
-import com.wip.model.ContentDomain;
-import com.wip.model.LogDomain;
-import com.wip.model.UserDomain;
+import com.wip.model.*;
 import com.wip.service.log.LogService;
 import com.wip.service.site.SiteService;
 import com.wip.service.user.UserService;
@@ -56,8 +53,11 @@ public class IndexController extends BaseController {
         List<CommentDomain> comments = siteService.getComments(5);
         // 获取5篇文章
         List<ContentDomain> contents = siteService.getNewArticles(5);
+        //获取5篇教程
+        List<CourseDomain> courses = siteService.getNewCourses(5);
         // 获取后台统计数
         StatisticsDto statistics = siteService.getStatistics();
+        StatisticsDto statistics_cs = siteService.getStatistics_cs();
 
         // 获取5篇日志
         PageInfo<LogDomain> logs = logService.getLogs(1,5);
@@ -65,7 +65,11 @@ public class IndexController extends BaseController {
 
         request.setAttribute("comments",comments);
         request.setAttribute("articles",contents);
+        //增加教程信息
+        request.setAttribute("courses",courses);
         request.setAttribute("statistics",statistics);
+        //增加含教程数量的统计
+        request.setAttribute("statistics_cs",statistics_cs);
         request.setAttribute("logs",list);
         LOGGER.info("Exit admin index method");
         return "admin/index";

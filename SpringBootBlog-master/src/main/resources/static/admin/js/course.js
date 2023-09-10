@@ -5,7 +5,7 @@
 $('#tags_cs').tagsInput({
     width: '100%',
     height: '35px',
-    defaultText: '请输入教程标签'
+    defaultText: ' '
 });
 
 $('.toggle').toggles({

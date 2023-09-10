@@ -81,7 +81,7 @@
         FROM
         <include refid="BASE_TABLE"/> AS cm
         WHERE
-        cm.csid = #{cid, jdbcType=INTEGER}
+        cm.csid = #{csid, jdbcType=INTEGER}
         AND
         cm.status = 'approved'
         ORDER BY
@@ -124,7 +124,7 @@
                 AND cm.parent = #{parent, jdbcType=INTEGER}
             </if>
         </where>
-        ORDER BY cm.created
+        ORDER BY cm.created DESC
     </select>
 
     <!--通过ID获取评论-->

@@ -174,7 +174,7 @@ public class CommentServiceImpl implements CommentService {
      * @return
      */
     @Override
-    @Cacheable(value = "commentCache", key = "'commentsByCId_' + #p0")
+    @Cacheable(value = "commentCache", key = "'commentsByCSId_' + #p0")
     public List<CommentDomain> getCommentsByCsId(Integer csid) {
         if (null == csid)
             throw BusinessException.withErrorCode(ErrorConstant.Common.PARAM_IS_EMPTY);

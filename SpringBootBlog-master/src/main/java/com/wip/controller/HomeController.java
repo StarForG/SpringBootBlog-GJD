@@ -12,9 +12,11 @@ import com.wip.dto.cond.MetaCond;
 import com.wip.exception.BusinessException;
 import com.wip.model.CommentDomain;
 import com.wip.model.ContentDomain;
+import com.wip.model.CourseDomain;
 import com.wip.model.MetaDomain;
 import com.wip.service.article.ContentService;
 import com.wip.service.comment.CommentService;
+import com.wip.service.course.CourseService;
 import com.wip.service.meta.MetaService;
 import com.wip.service.site.SiteService;
 import com.wip.utils.APIResponse;
@@ -43,6 +45,9 @@ public class HomeController extends BaseController {
     private ContentService contentService;
 
     @Autowired
+    private CourseService courseService;
+
+    @Autowired
     private CommentService commentService;
 
     @Autowired
@@ -64,6 +69,31 @@ public class HomeController extends BaseController {
         request.setAttribute("articles",articles);
         return "blog/home";
     }
+
+    /**
+     * 跳转教程界面
+     * @param request
+     * @param page
+     * @param limit
+     * @return
+     */
+    @GetMapping(value = "/course")
+    public String course(
+            HttpServletRequest request,
+            @ApiParam(name = "page", value = "页数", required = false)
+            @RequestParam(name = "page", required = false, defaultValue = "1")
+            int page,
+            @ApiParam(name = "limit", value = "每页数量", required = false)
+            @RequestParam(name = "limit", required = false, defaultValue = "5")
+            int limit
+    ) {
+        PageInfo<CourseDomain> courses = courseService.getCourseByCond(new ContentCond(), page, limit);
+
+        request.setAttribute("courses",courses);
+        return "blog/course";
+    }
+
+
 
     @ApiOperation("归档内容页")
     @GetMapping(value = "/archives")
@@ -107,6 +137,29 @@ public class HomeController extends BaseController {
         List<ContentDomain> articles = contentService.getArticleByCategory(category.getName());
         request.setAttribute("category", category.getName());
         request.setAttribute("articles", articles);
+        return "blog/category_detail";
+    }
+
+    /**
+     * 跳转教程分类详情界面
+     * @param request
+     * @param name
+     * @return
+     */
+    @ApiOperation("分类详情页")
+    @GetMapping(value = "/categories_cs/{name}")
+    public String categories_csDetail(
+            HttpServletRequest request,
+            @ApiParam(name = "name", value = "分类名称", required = true)
+            @PathVariable("name")
+            String name
+    ) {
+        MetaDomain category = metaService.getMetaByName(Types.CATEGORY.getType(),name);
+        if (null == category.getName())
+            throw BusinessException.withErrorCode(ErrorConstant.Common.PARAM_IS_EMPTY);
+        List<CourseDomain> courses = courseService.getCourseByCategory(category.getName());
+        request.setAttribute("category", category.getName());
+        request.setAttribute("courses", courses);
         return "blog/category_detail";
     }
 
@@ -163,6 +216,32 @@ public class HomeController extends BaseController {
     }
 
     /**
+     * 跳转教程详情界面
+     * @param csid
+     * @param request
+     * @return
+     */
+    @ApiOperation("教程内容页")
+    @GetMapping(value = "/detail_cs/{csid}")
+    public String courseDetail(
+            @ApiParam(name = "csid", value = "教程主键", required = true)
+            @PathVariable("csid")
+            Integer csid,
+            HttpServletRequest request
+    ) {
+        CourseDomain course = courseService.getCourseById(csid);
+        request.setAttribute("course", course);
+
+        // 更新教程的点击量
+        this.updateCourseHits(course.getCsid(),course.getHits());
+        // 获取评论
+        List<CommentDomain> comments = commentService.getCommentsByCsId(csid);
+        request.setAttribute("comments", comments);
+
+        return "blog/course_detail";
+    }
+
+    /**
      * 更新文章的点击率
      * @param cid
      * @param chits
@@ -181,6 +260,29 @@ public class HomeController extends BaseController {
             cache.hset("article", "hits", 1);
         } else {
             cache.hset("article", "hits", hits);
+        }
+
+    }
+
+    /**
+     * 更新教程的点击率
+     * @param csid
+     * @param chits
+     */
+    private void updateCourseHits(Integer csid, Integer chits) {
+        Integer hits = cache.hget("course", "hits");
+        if (chits == null) {
+            chits = 0;
+        }
+        hits = null == hits ? 1 : hits + 1;
+        if (hits >= WebConst.HIT_EXEED) {
+            CourseDomain temp = new CourseDomain();
+            temp.setCsid(csid);
+            temp.setHits(chits + hits);
+            courseService.updateCourseByCsid(temp);
+            cache.hset("course", "hits", 1);
+        } else {
+            cache.hset("course", "hits", hits);
         }
 
     }
@@ -345,7 +447,7 @@ public class HomeController extends BaseController {
         comments.setParent(coid);
 
         try {
-            commentService.addComment(comments);
+            commentService.addComment2(comments);
             cookie("tale_remember_author", URLEncoder.encode(author,"UTF-8"), 7 * 24 * 60 * 60, response);
             cookie("tale_remember_mail", URLEncoder.encode(email,"UTF-8"), 7 * 24 * 60 * 60, response);
             if (StringUtils.isNotBlank(url)) {

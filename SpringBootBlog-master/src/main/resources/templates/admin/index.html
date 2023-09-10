@@ -21,6 +21,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="col-sm-6 col-lg-3">
                             <div class="mini-stat clearfix bg-purple bx-shadow">
                                 <span class="mini-stat-icon"><i class="fa fa-comments-o" aria-hidden="true"></i></span>
@@ -40,7 +41,16 @@
                                 </div>
                             </div>
                         </div>
-
+                        <!-- 添加教程仪表盘-->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="mini-stat clearfix bx-shadow bg-info">
+                                <span class="mini-stat-icon"><i class="fa fa-quote-right" aria-hidden="true"></i></span>
+                                <div class="mini-stat-info text-right">
+                                    发表了<span class="counter" th:text="${statistics_cs.articles}"></span>篇教程
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 结束-->
                         <div class="col-sm-6 col-lg-3">
                             <div class="mini-stat clearfix bg-primary bx-shadow">
                                 <span class="mini-stat-icon"><i class="fa fa-link" aria-hidden="true"></i></span>
@@ -67,6 +77,23 @@
                                 </div>
                             </div>
                         </div>
+<!--                        教程列表预览-->
+                        <div class="col-md-4">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">最新教程</h4>
+                                </div>
+                                <div class="panel-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item" th:each="course : ${courses}">
+                                            <span class="badge badge-primary" th:title="${course.commentsNum}+'条评论'" th:text="${course.commentsNum}"></span>
+                                            <a target="_blank" th:href="${commons.site_url('/detail_cs/')}+${course.csid}" th:text="${commons.subStr(course.title,12)}"></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+<!--                        结束-->
                         <div class="col-md-4">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
