@@ -112,7 +112,7 @@
             csid, mid,
         </trim>
         <trim prefix="VALUES(" suffix=")" suffixOverrides=",">
-            #{csid, jdbcType=INTEGER},
+            #{cid, jdbcType=INTEGER},
             #{mid, jdbcType=INTEGER}
         </trim>
     </insert>

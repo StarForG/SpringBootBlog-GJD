@@ -95,18 +95,20 @@
                     <!--<a th:href="@{/admin/page}" th:class="${active}=='page'?'waves-effect active':'waves-effect'"><i-->
                             <!--class="fa fa-file-text" aria-hidden="true"></i><span> 页面管理 </span></a>-->
                 <!--</li>-->
-<!--               开始 添加 发布教程和教程管理栏目-->
+
+<!--               开始 添加发布教程和教程管理栏目-->
                 <li th:class="${active}=='pub_course'?'active':''">
-                    <a th:href="@{/admin/article/publish}"
+                    <a th:href="@{/admin/course/pub_course}"
                        th:class="${active}=='pub_course'?'waves-effect active':'waves-effect'"><i
                             class="fa fa-pencil-square-o" aria-hidden="true"></i><span> 发布教程 </span></a>
                 </li>
                 <li th:class="${active}=='course'?'active':''">
-                    <a th:href="@{/admin/article}"
+                    <a th:href="@{/admin/course}"
                        th:class="${active}=='course'?'waves-effect active':'waves-effect'"><i
                             class="fa fa-list" aria-hidden="true"></i><span> 教程管理 </span></a>
                 </li>
 <!--               结束-->
+
                 <li th:class="${active}=='comments'?'active':''">
                     <a th:href="@{/admin/comments}"
                        th:class="${active}=='comments'?'waves-effect active':'waves-effect'"><i
