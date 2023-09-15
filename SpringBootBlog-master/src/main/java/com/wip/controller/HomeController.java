@@ -325,8 +325,8 @@ public class HomeController extends BaseController {
             return APIResponse.fail("请输入正确的网址格式");
         }
 
-        if (content.length() > 200) {
-            return APIResponse.fail("请输入200个字符以内的评价");
+        if (content.length() > 200 || content.length()<5) {
+            return APIResponse.fail("请输入5-200个字符的评价");
         }
 
         String val = IPKit.getIpAddressByRequest1(request) + ":" + cid;
@@ -420,8 +420,8 @@ public class HomeController extends BaseController {
             return APIResponse.fail("请输入正确的网址格式");
         }
 
-        if (content.length() > 200) {
-            return APIResponse.fail("请输入200个字符以内的评价");
+        if (content.length() > 200 || content.length() < 5) {
+            return APIResponse.fail("请输入5-200个字符的评价");
         }
 
         String val = IPKit.getIpAddressByRequest1(request) + ":" + csid;
